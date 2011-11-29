@@ -1,43 +1,35 @@
-#!/usr/bin/python
-import random, getpass, time, os
-
+import time, os; from random import random, randrange
 with open(os.path.join(os.path.dirname(__file__), 'chars'),'r') as charFile:
     chars=[l.replace('\t','').rstrip('\n').rsplit(',') for l in charFile if l[0]!='#']
-
-with open(os.path.join(os.path.dirname(__file__), 'mixChars'),'r') as mixCharFile:
-    mixChars=[l.rstrip('\n') for l in mixCharFile if l[0]!='#' and not any(c[0]==l.rstrip('\n') for c in chars)]
-
-toChinese = lambda english: chars[[c[2] for c in chars].index(english)][0]
-
-mixCharRatio=0.1
-red='\033[31m'
-yellow='\033[33m'
-green='\033[32m'
-blue='\033[34m'
-purple='\033[36m'
-standard='\033[0;m'
+toChinese=lambda english: chars[[c[2] for c in chars].index(english)][0]
+termColor={'red':'31','yellow':'33','green':'32','blue':'34','turquoise':'36','std':'0;'}
+def printInCol(col,text):print('\033['+termColor[col]+'m'+text+'\033['+termColor['std']+'m')
 with open(os.path.expanduser('~/.mandarinTrainerHist'),'a+') as histFile:
-	hist=[l for l in histFile]
-	print hist
+	hist=[l.rstrip('\n').rsplit('\t') for l in histFile]
+	lastTime=lambda charI,p:max([float(h[2]) for h in hist if h[:2]==[chars[charI][0],str(p)]]+[-1])
+	active=lambda charI:lastTime(charI,0)!=-1 or lastTime(charI,1)!=-1
+	probDecay=lambda charI:max(min(0.5*len(chars),5e4/(lastTime(charI,1)-lastTime(charI,0))),1.0)
+	prob=lambda charI:(2.0*len(chars) if lastTime(charI,1)<lastTime(charI,0) else probDecay(charI)) if active(charI) else 1.0	
+	getChar=lambda n=20,r=0,i=0:getChar(n=n-1,r=randrange(len(chars)),i=r if random()<prob(r)/prob(i) else i) if n else i
 	while True:
-		if random.random()<mixCharRatio:
-		    char=mixChars[random.randint(0,len(chars)-1)]
-		    correct=''
-		else:
-		    i=random.randint(0,len(chars)-1)
-		    char=chars[i][0]
-		    correct=chars[i][2]
-		print(yellow+char+':')
+		i=getChar();
+		printInCol('yellow',chars[i][0]+':')
 		try:
-			if raw_input('')==correct:
-				print(green+toChinese('right'))
-				histFile.write('dd\t'+str(time.time())+'\n')
+			if raw_input('')==chars[i][2]:
+				printInCol('green',toChinese('right'))
+				histFile.write(chars[i][0]+'\t1'+'\t'+str(time.time())+'\n')
+				hist.append([chars[i][0],'1',time.time()])
 			else:
-				print(red+toChinese('not')+toChinese('right')+','+
-					toChinese('it')+toChinese('is')+': '+correct)
-				histFile.write('ddf\n')
-				if correct:
-					print(blue+toChinese('pinyin')+': '+chars[i][1])
+				printInCol('red',toChinese('not')+toChinese('right')+','+toChinese('it')+toChinese('is')+': '+chars[i][2])
+				histFile.write(chars[i][0]+'\t0'+'\t'+str(time.time())+'\n')
+				hist.append([chars[i][0],'0',time.time()])
+			if chars[i][2]:
+				printInCol('blue',toChinese('pinyin')+': '+chars[i][1])
 		except KeyboardInterrupt:
-			print(purple+'\n'+toChinese('goodbye')+standard)
+			countType=lambda t:len([1 for i in range(len(chars)) if t(i)])
+			printInCol('blue','\n'+str(countType(lambda i:True))+' '+toChinese('many'))
+			printInCol('green',str(countType(lambda i:lastTime(i,1)-lastTime(i,0)>5e4))+' '+toChinese('know'))
+			printInCol('yellow',str(countType(active))+' '+toChinese('use'))
+			printInCol('red',str(countType(lambda i:lastTime(i,1)==-1))+' '+toChinese('not')+toChinese('use'))
+			printInCol('turquoise',toChinese('goodbye'))
 			break
