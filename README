@@ -1,0 +1,1 @@
+This program lets you excercise on recognizing some Chinese characters and see their pronounciation. The program saves statistics about your learning in ~/.mandarinTrainerHist. This program is written by Petter Säterskog, petter.saterskog@gmail.com. See COPYING for license information. Sorry for bad code. It's just a fast hack but it works.
