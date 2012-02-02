@@ -1,1 +1,8 @@
-This program lets you excercise on recognizing some Chinese characters and see their pronounciation. The program saves statistics about your learning in ~/.mandarinTrainerHist. This program is written by Petter Säterskog, petter.saterskog@gmail.com. See COPYING for license information. Sorry for bad code. It's just a fast hack but it works.
+This program lets you excercise on recognizing some Chinese characters and see their pronounciation. 
+The default character set match (at time of programming) the first course in Putonghua on HKUST for English speakers.
+The program saves statistics about your learning in ~/.mandarinTrainerHist. It is tested and works on Linux and mac,
+though a terminal with support for Chinese characters is needed.
+
+This program is written by Petter Säterskog, petter.saterskog@gmail.com. See COPYING for license information.
+
+Sorry for bad code. It's just a fast hack but it works.
